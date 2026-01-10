@@ -15,8 +15,20 @@ module "vpc" {
   enable_dns_support   = true
   enable_dns_hostnames = true
 
+  # EKS requires these tags for automatic subnet discovery
   tags = {
-    Environment = "dev"
-    Project     = "devops-production-microservices"
+    Environment                               = "dev"
+    Project                                   = "devops-production-microservices"
+    "kubernetes.io/cluster/myapp-eks-cluster" = "shared"
+  }
+
+  # Tags for private subnets - used for internal load balancers
+  private_subnet_tags = {
+    "kubernetes.io/role/internal-elb" = "1"
+  }
+
+  # Tags for public subnets - used for internet-facing load balancers
+  public_subnet_tags = {
+    "kubernetes.io/role/elb" = "1"
   }
 }
