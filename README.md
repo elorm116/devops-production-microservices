@@ -25,5 +25,5 @@ to reflect real-world, team-oriented development environments.
 - Product Service (Python / FastAPI)
 - Order Service (Go)
 
-## Status
-🚧 Project under active development
+## CI/CD Design Decision
+For the purposes of this demo, I ran Jenkins in a Linode VM.

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: order-service
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: order-service
@@ -13,14 +13,35 @@ spec:
         app: order-service
     spec:
       containers:
-        - name: order
-          image: <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/order-service:latest
-          ports:
-            - containerPort: 8080
-          resources:
-            requests:
-              memory: "64Mi"
-              cpu: "50m"
-            limits:
-              memory: "128Mi"
-              cpu: "250m"
+      - name: order-service
+        image: <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/order-service:latest
+        ports:
+        - containerPort: 8080
+        
+        # Liveness Probe - Restarts pod if unhealthy
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10  # Wait 10s after pod starts before checking
+          periodSeconds: 10         # Check every 10 seconds
+          timeoutSeconds: 5         # Wait max 5s for response
+          failureThreshold: 3       # Restart after 3 failed checks
+        
+        # Readiness Probe - Controls traffic routing
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5   # Wait 5s after pod starts before checking
+          periodSeconds: 5          # Check every 5 seconds
+          timeoutSeconds: 3         # Wait max 3s for response
+          failureThreshold: 3       # Remove from service after 3 failed checks
+        
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"

@@ -4,6 +4,10 @@ on:
   push:
     paths:
       - "services/auth-node/**"
+      - "docker/auth-node.Dockerfile"
+
+env:
+  AWS_REGION: us-east-1
 
 jobs:
   build:
@@ -25,7 +29,11 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t auth-service:${{ github.sha }} services/auth-node
-          docker tag auth-service:${{ github.sha }} \
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/auth-service:${{ github.sha }}
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/auth-service:${{ github.sha }}
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          docker build -f docker/auth-node.Dockerfile -t auth-service:${SHORT_SHA} services/auth-node
+          docker tag auth-service:${SHORT_SHA} \
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/auth-service:${SHORT_SHA}
+          docker tag auth-service:${SHORT_SHA} \
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/auth-service:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/auth-service:${SHORT_SHA}
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/auth-service:latest
