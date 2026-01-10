@@ -1,0 +1,4 @@
+# Go specific
+go.sum
+*.test
+*.out

@@ -1,0 +1,3 @@
+# Python specific
+*.egg-info/
+.eggs/
