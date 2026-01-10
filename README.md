@@ -267,3 +267,38 @@ This project is for educational and portfolio purposes.
 ---
 
 *Built as a portfolio project demonstrating production-grade DevOps practices.*
+
+
+---------------------------------
+
+# DevOps Production Microservices -- More Modern Design
+
+Current focus: moving toward GitOps (ArgoCD), automatic TLS, better observability
+
+## Current Stack
+
+- AWS EKS
+- Terraform (VPC + EKS + ECR)
+- GitHub Actions CI per service
+- Kubernetes manifests (soon → GitOps)
+
+## Services
+
+| Service  | Language   | New folder name    | Status      |
+|----------|------------|--------------------|-------------|
+| Auth     | Node.js    | `services/auth`    | maybe archive |
+| Product  | Python     | `services/product` | keep        |
+| Order    | Go         | `services/order`   | keep        |
+
+## Planned Modernization Path
+
+1. Clean structure & drop Jenkins
+2. Modern GitHub Actions CI
+3. Introduce ArgoCD ApplicationSets + Kustomize
+4. cert-manager + ExternalDNS + real TLS
+5. Amazon Managed Prometheus + Grafana
+6. External Secrets Operator
+7. Architecture diagrams + ADRs
+8. Nice demo video
+
+Work in progress — follow the journey!

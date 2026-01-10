@@ -3,8 +3,8 @@ name: Order Service CI
 on:
   push:
     paths:
-      - "services/order-go/**"
-      - "docker/order-go.Dockerfile"
+      - "services/order/**"
+      - "docker/order/Dockerfile"
 
 env:
   AWS_REGION: us-east-1

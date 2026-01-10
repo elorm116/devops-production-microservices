@@ -3,8 +3,8 @@ name: Product Service CI
 on:
   push:
     paths:
-      - "services/product-python/**"
-      - "docker/product-python.Dockerfile"
+      - "services/product/**"
+      - "docker/product/Dockerfile"
 
 env:
   AWS_REGION: us-east-1

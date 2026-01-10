@@ -3,8 +3,8 @@ name: Auth Service CI
 on:
   push:
     paths:
-      - "services/auth-node/**"
-      - "docker/auth-node.Dockerfile"
+      - "services/auth/**"
+      - "docker/auth/Dockerfile"
 
 env:
   AWS_REGION: us-east-1
