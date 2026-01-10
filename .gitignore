@@ -92,6 +92,7 @@ Thumbs.db
 **/*_override.tf.json
 **/.terraformrc
 **/terraform.rc
+**/*.tfvars
 
 # ========================================
 # Kubernetes
