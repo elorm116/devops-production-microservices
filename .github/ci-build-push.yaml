@@ -1,0 +1,80 @@
+name: CI - Build & Push Images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/order/**'
+      - 'services/product/**'
+      - 'services/*/Dockerfile'
+  pull_request:
+    paths:
+      - 'services/order/**'
+      - 'services/product/**'
+      - 'services/*/Dockerfile'
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+permissions:
+  id-token: write       # Required for OIDC
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  build-and-push:
+    name: Build & Push ${{ matrix.service }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service: [order, product]
+        include:
+          - service: order
+            context: ./services/order
+            dockerfile: ./services/order/Dockerfile
+            ecr_repo: order-service           # ← CHANGE if your ECR repo name is different!
+          - service: product
+            context: ./services/product
+            dockerfile: ./services/product/Dockerfile
+            ecr_repo: product-service         # ← CHANGE if your ECR repo name is different!
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # === Recommended: OIDC (secure, no long-lived secrets) ===
+      # Setup instructions: https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::867344472959:role/gha-ecr-push-devops   # ← CHANGE THIS!
+          aws-region: us-east-1
+
+      # Fallback (less secure - use only if you haven't set up OIDC yet)
+      # - name: Configure AWS Credentials (Access Keys)
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region:            ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build & Push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ matrix.ecr_repo }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ matrix.ecr_repo }}:latest
+          # Very important - fast repeated builds!
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
