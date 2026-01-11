@@ -318,12 +318,12 @@ graph TD
     D --> G[Pods: order-service<br>Go app]
     D --> H[Pods: product-service<br>FastAPI app]
 
-    I[Ingress + cert-manager + ExternalDNS] -->|HTTPS + DNS| J[Route53 Domain<br>(future)]
+    I[Ingress + cert-manager + ExternalDNS] -->|HTTPS + DNS| J[Route53 Domain\n(future)]
 
     K[Amazon Managed Prometheus + Grafana] -->|scrape metrics| D
 
     style A fill:#f9f,stroke:#333
     style C fill:#ff9900,stroke:#333,color:#fff
     style D fill:#527fff,stroke:#333,color:#fff
-    
+
 Work in progress — follow the journey!
