@@ -305,25 +305,25 @@ Current focus: moving toward GitOps (ArgoCD), automatic TLS, better observabilit
 ## Architecture Overview
 
 graph TD
-    A[GitHub Repository] -->|push or PR| B[GitHub Actions CI]
-    B -->|build and push images<br/>short SHA plus latest| C[Amazon ECR]
+    A[GitHub Repository] -->|push / PR| B[GitHub Actions CI]
+    B -->|build & push images<br/>short SHA + latest| C[Amazon ECR]
     C -->|pull images| D[AWS EKS Cluster]
 
-    subgraph GitOps_ArgoCD_Planned
+    subgraph GitOps
         E[Git Repo manifests] -->|sync| F[ArgoCD Controller]
         F -->|apply| D
     end
 
     D --> G[Pods: order-service<br/>Go app]
     D --> H[Pods: product-service<br/>FastAPI app]
-    D --> I[Pods: auth-service<br/>Node.js app]
 
-    J[Ingress with cert-manager and ExternalDNS] -->|HTTPS and DNS| K[Route53 Domain - future]
+    I[Ingress + cert-manager + ExternalDNS] -->|HTTPS + DNS| J[Route53 Domain]
 
-    L[Amazon Managed Prometheus and Grafana] -->|scrape metrics| D
+    K[Amazon Managed Prometheus + Grafana] -->|scrape metrics| D
 
     style A fill:#f9f,stroke:#333
     style C fill:#ff9900,stroke:#333,color:#fff
     style D fill:#527fff,stroke:#333,color:#fff
+    
 
 Work in progress — follow the journey!
