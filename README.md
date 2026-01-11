@@ -304,6 +304,7 @@ Current focus: moving toward GitOps (ArgoCD), automatic TLS, better observabilit
 
 ## Architecture Overview
 
+```mermaid
 graph TD
     A[GitHub Repository] -->|push / PR| B[GitHub Actions CI]
     B -->|build & push images<br/>short SHA + latest| C[Amazon ECR]
@@ -324,6 +325,7 @@ graph TD
     style A fill:#f9f,stroke:#333
     style C fill:#ff9900,stroke:#333,color:#fff
     style D fill:#527fff,stroke:#333,color:#fff
-    
+```
+
 
 Work in progress — follow the journey!
