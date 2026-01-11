@@ -1,8 +1,12 @@
 FROM golang:1.23-alpine AS builder
+
 WORKDIR /app
 
+# Only copy go.mod — go.sum is optional and not needed here
 COPY go.mod ./
-RUN go mod download     # Works even if go.sum is missing
+
+# This works perfectly even without go.sum
+RUN go mod download
 
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
