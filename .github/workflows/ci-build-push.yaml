@@ -43,6 +43,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Generate short SHA
+        id: vars
+        run: echo "short_sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
       # === Recommended: OIDC (secure, no long-lived secrets) ===
       # Setup instructions: https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
       - name: Configure AWS Credentials (OIDC)
@@ -72,9 +76,14 @@ jobs:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
           push: true
+          pull: true
           tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ matrix.ecr_repo }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ matrix.ecr_repo }}:${{ steps.vars.outputs.short_sha }}
             ${{ steps.login-ecr.outputs.registry }}/${{ matrix.ecr_repo }}:latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
           # Very important - fast repeated builds!
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: true
