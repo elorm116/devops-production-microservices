@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: microservices
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io  # auto-cleanup on delete
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/elorm116/devops-production-microservices.git
+    targetRevision: HEAD
+    path: k8s/base  # ← change to your actual path (e.g. k8s/base, k8s/overlays/prod)
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: microservices   
+  syncPolicy:
+    automated:
+      prune: true          # delete resources not in Git
+      selfHeal: true       # auto-fix drift
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
