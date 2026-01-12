@@ -29,16 +29,18 @@ module "vpc" {
   tags = {
     Environment                               = "dev"
     Project                                   = "devops-production-microservices"
-    "kubernetes.io/cluster/devops-prod-eks" = "shared"
+    "kubernetes.io/cluster/devops-prod-eks"   = "shared"
   }
 
   # Tags for private subnets - used for internal load balancers
   private_subnet_tags = {
     "kubernetes.io/role/internal-elb" = "1"
+    "kubernetes.io/cluster/devops-prod-eks" = "shared"
   }
 
   # Tags for public subnets - used for internet-facing load balancers
   public_subnet_tags = {
     "kubernetes.io/role/elb" = "1"
+    "kubernetes.io/cluster/devops-prod-eks" = "shared"
   }
 }
