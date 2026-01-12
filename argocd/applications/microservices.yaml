@@ -4,7 +4,7 @@ metadata:
   name: microservices
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argoproj.io  # auto-cleanup on delete
+    - resources-finalizer.argocd.argoproj.io/background  # auto-cleanup on delete
 spec:
   project: default
   source:
