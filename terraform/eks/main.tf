@@ -22,6 +22,13 @@ module "eks" {
 
   enable_irsa = true
 
+    # Enable cluster endpoint access
+   endpoint_public_access  = true
+   endpoint_private_access = true
+   
+   # Adds current IAM user as admin to the cluster
+   enable_cluster_creator_admin_permissions = true
+
   addons = {
     coredns            = {}
     kube-proxy         = {}
@@ -31,10 +38,10 @@ module "eks" {
 
   eks_managed_node_groups = {
     worker_group_node_1 = {
-      instance_types = ["t3.micro"]
+      instance_types = ["t3.small"]
       min_size       = 1
       max_size       = 3
-      desired_size   = 1
+      desired_size   = 2
 
       capacity_type = "SPOT"
     }
