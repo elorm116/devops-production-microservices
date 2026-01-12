@@ -9,13 +9,15 @@ commonLabels:
   app.kubernetes.io/part-of: microservices
   environment: prod
 
-# Your resources (good as-is)
+# Your resources (file locations)
 resources:
-  - deployments
-  - services
-  - ingress
+  - deployments/order.yaml
+  - deployments/product.yaml
+  - services/order.yaml
+  - services/product.yaml
+  - ingress/ingress.yaml
 
-# Optional: if you have configmaps/secrets in config/
+# Loading ConfigMap from a file
 configMapGenerator:
   - name: app-config
     files:
