@@ -1,12 +1,13 @@
+data "aws_eks_cluster_auth" "main" {
+  name = module.eks.cluster_name
+}
+
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-  token                  = data.aws_eks_cluster_auth.devops-prod-eks.token
+  token                  = data.aws_eks_cluster_auth.main.token
 }
 
-data "aws_eks_cluster_auth" "eks" {
-  name = module.eks.cluster_name
-}
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -21,21 +22,23 @@ module "eks" {
 
   enable_irsa = true
 
+  addons = {
+    coredns            = {}
+    kube-proxy         = {}
+    vpc-cni            = {}
+    aws-ebs-csi-driver = {}
+  }
+
   eks_managed_node_groups = {
     worker_group_node_1 = {
       instance_types = ["t3.micro"]
       min_size       = 1
-      max_size       = 2
+      max_size       = 3
       desired_size   = 1
-    }
-    worker_group_node_2 = {
-      instance_types = ["t3.small"]
-      min_size       = 1
-      max_size       = 2
-      desired_size   = 1
-    }
-    }
 
+      capacity_type = "SPOT"
+    }
+  }
 
   tags = {
     Environment = "dev"
