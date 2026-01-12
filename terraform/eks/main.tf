@@ -38,12 +38,10 @@ module "eks" {
 
   eks_managed_node_groups = {
     worker_group_node_1 = {
-      instance_types = ["t3.small"]
+      instance_types = ["t3.medium"]
       min_size       = 1
       max_size       = 3
-      desired_size   = 2
-
-      capacity_type = "SPOT"
+      desired_size   = 1
     }
   }
 
