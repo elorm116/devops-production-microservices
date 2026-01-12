@@ -1,7 +1,32 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# Optional: set a default namespace for all resources
+namespace: microservices   # ← recommended if you want everything in one ns
+
+# Optional: common labels added to every resource
+commonLabels:
+  app.kubernetes.io/part-of: microservices
+  environment: prod
+
+# Your resources (good as-is)
 resources:
   - deployments
   - services
   - ingress
+
+# Optional: if you have configmaps/secrets in config/
+configMapGenerator:
+  - name: app-config
+    files:
+      - config/app-config.yaml
+
+# Optional: images override (useful when using short SHA tags from CI)
+images:
+  - name: product-service
+    newName: 867344472959.dkr.ecr.us-east-1.amazonaws.com/product-service
+    newTag: latest   # or use :short-sha if you want pinned versions
+
+  - name: order-service
+    newName: 867344472959.dkr.ecr.us-east-1.amazonaws.com/order-service
+    newTag: latest
