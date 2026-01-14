@@ -147,3 +147,4 @@ Thumbs.db
 **/.aws/
 **/credentials
 **/*.credentials
+**/*.json

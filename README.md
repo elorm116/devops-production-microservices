@@ -1,161 +1,10 @@
-# Production-Grade DevOps Microservices Platform
 
 [![Terraform](https://img.shields.io/badge/Terraform-1.7+-purple?logo=terraform)](https://terraform.io)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.34-blue?logo=kubernetes)](https://kubernetes.io)
 [![AWS](https://img.shields.io/badge/AWS-EKS-orange?logo=amazon-aws)](https://aws.amazon.com/eks/)
 [![Docker](https://img.shields.io/badge/Docker-Containerized-blue?logo=docker)](https://docker.com)
 
-## 🎯 Project Overview
 
-A **production-style microservices platform** demonstrating modern DevOps practices using AWS, Kubernetes (EKS), Terraform, Docker, GitHub Actions, and Jenkins.
-
-This project showcases end-to-end infrastructure automation and CI/CD pipelines, reflecting real-world enterprise environments where teams work with multiple programming languages and deployment strategies.
-
-### What This Project Demonstrates
-
-- **Infrastructure as Code** — Full AWS infrastructure provisioned via Terraform modules
-- **Container Orchestration** — Kubernetes deployments with resource limits, health checks, and rolling updates
-- **CI/CD Pipelines** — Automated build, test, and deploy workflows
-- **Multi-Language Microservices** — Polyglot architecture with Node.js, Python, and Go
-- **Security Best Practices** — IAM roles, KMS encryption, private subnets, secret management
-- **GitOps Workflow** — Infrastructure changes via pull requests with plan reviews
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                           AWS Cloud                                  │
-│  ┌───────────────────────────────────────────────────────────────┐  │
-│  │                         VPC (10.0.0.0/16)                     │  │
-│  │  ┌─────────────────────┐    ┌─────────────────────────────┐   │  │
-│  │  │   Public Subnets    │    │     Private Subnets         │   │  │
-│  │  │  ┌───────────────┐  │    │  ┌───────────────────────┐  │   │  │
-│  │  │  │ NAT Gateway   │  │    │  │    EKS Node Group     │  │   │  │
-│  │  │  │ Load Balancer │  │    │  │  ┌─────┐ ┌─────┐     │  │   │  │
-│  │  │  └───────────────┘  │    │  │  │Auth │ │Order│     │  │   │  │
-│  │  └─────────────────────┘    │  │  └─────┘ └─────┘     │  │   │  │
-│  │                             │  │  ┌─────────┐         │  │   │  │
-│  │                             │  │  │Product  │         │  │   │  │
-│  │                             │  │  └─────────┘         │  │   │  │
-│  │                             │  └───────────────────────┘  │   │  │
-│  │                             └─────────────────────────────┘   │  │
-│  └───────────────────────────────────────────────────────────────┘  │
-│                                                                      │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │
-│  │  ECR: auth   │  │ ECR: product │  │  ECR: order  │               │
-│  └──────────────┘  └──────────────┘  └──────────────┘               │
-└─────────────────────────────────────────────────────────────────────┘
-
-         ▲                    ▲                    ▲
-         │                    │                    │
-    ┌────┴────────────────────┴────────────────────┴────┐
-    │              GitHub Actions CI/CD                  │
-    │  ┌────────────┐  ┌────────────┐  ┌────────────┐   │
-    │  │ auth-ci    │  │ product-ci │  │ order-ci   │   │
-    │  └────────────┘  └────────────┘  └────────────┘   │
-    │  ┌─────────────────────────────────────────────┐  │
-    │  │           terraform.yaml                    │  │
-    │  │   (Plan → Review → Apply Infrastructure)    │  │
-    │  └─────────────────────────────────────────────┘  │
-    └───────────────────────────────────────────────────┘
-```
-
-### Tech Stack
-
-| Category | Technology |
-|----------|------------|
-| **Cloud Provider** | AWS (EKS, ECR, VPC, IAM, KMS) |
-| **Orchestration** | Kubernetes 1.34 |
-| **Infrastructure as Code** | Terraform 1.7+ with modules |
-| **CI/CD** | GitHub Actions + Jenkins |
-| **Containerization** | Docker with multi-stage builds |
-| **Languages** | Node.js, Python (FastAPI), Go |
-
----
-
-## 📁 Project Structure
-
-```
-.
-├── .github/workflows/          # GitHub Actions CI/CD pipelines
-│   ├── auth-ci.yaml            # Auth service build & push
-│   ├── order-ci.yaml           # Order service build & push
-│   ├── product-ci.yaml         # Product service build & push
-│   └── terraform.yaml          # Infrastructure automation
-├── docker/                     # Dockerfiles for each service
-│   ├── auth-node.Dockerfile
-│   ├── order-go.Dockerfile
-│   └── product-python.Dockerfile
-├── k8s/                        # Kubernetes manifests
-│   ├── deployments/            # Service deployments
-│   ├── services/               # ClusterIP/LoadBalancer services
-│   ├── ingress/                # Ingress rules
-│   └── config/                 # ConfigMaps
-├── services/                   # Microservice source code
-│   ├── auth-node/              # Node.js authentication service
-│   ├── order-go/               # Go order processing service
-│   └── product-python/         # Python/FastAPI product catalog
-├── terraform/                  # Infrastructure as Code
-│   ├── main.tf                 # Root module
-│   ├── variables.tf            # Input variables
-│   ├── terraform.tfvars        # Variable values
-│   ├── vpc/                    # VPC module
-│   ├── eks/                    # EKS cluster module
-│   ├── ecr/                    # Container registry module
-│   └── backend/                # S3 state backend config
-├── Jenkinsfile                 # Jenkins CD pipeline
-└── README.md
-```
-
----
-
-## 🚀 Microservices
-
-| Service | Language | Port | Purpose |
-|---------|----------|------|---------|
-| **auth-service** | Node.js | 3000 | User authentication & JWT tokens |
-| **product-service** | Python/FastAPI | 3000 | Product catalog API |
-| **order-service** | Go | 8080 | Order processing & management |
-
-Each service:
-- Has its own Dockerfile with multi-stage builds
-- Includes health check endpoints
-- Defines resource limits (CPU/memory)
-- Is independently deployable via CI/CD
-
----
-
-## 🔧 CI/CD Pipelines
-
-### GitHub Actions Workflows
-
-#### Service CI Pipelines (`auth-ci.yaml`, `product-ci.yaml`, `order-ci.yaml`)
-- **Trigger**: Push to `services/<service-name>/**` or Dockerfile changes
-- **Steps**: Checkout → AWS Auth → ECR Login → Build → Tag → Push
-- **Tags**: Short SHA + `latest`
-
-#### Terraform Pipeline (`terraform.yaml`)
-- **On PR**: Validate → Plan → Post plan as PR comment
-- **On Push to main**: Validate → Plan → Apply (requires approval)
-- **Manual dispatch**: Plan, Apply, or Destroy
-
-### Jenkins Pipeline (`Jenkinsfile`)
-- Deploys to EKS using `kubectl set image`
-- Verifies rollout with `kubectl rollout status`
-- Supports parameterized builds for AWS Account ID
-
----
-
-## 🏃 Getting Started
-
-### Prerequisites
-
-- AWS CLI configured with appropriate permissions
-- Terraform >= 1.7.0
-- kubectl
-- Docker
 
 ### Deploy Infrastructure
 
@@ -251,42 +100,37 @@ This project showcases proficiency in:
 
 ---
 
-## 📄 License
 
-This project is for educational and portfolio purposes.
-
----
-
-## 👤 Author
-
-**[Your Name]**
-- LinkedIn: [your-linkedin]
-- GitHub: [your-github]
-- Email: aezottor.@gmail.com
-
----
-
-*Built as a portfolio project demonstrating production-grade DevOps practices.*
 
 
 ---------------------------------
 
 # DevOps Production Microservices -- More Modern Design
 
-Current focus: moving toward GitOps (ArgoCD), automatic TLS, better observability
+A modern, production-grade microservices portfolio project built with:
+
+Microservices: Order (Go) + Product (FastAPI/Python)
+CI/CD: GitHub Actions with OIDC (no long-lived secrets), matrix builds, short SHA tagging
+Container Registry: AWS ECR (private repos)
+Orchestration: Amazon EKS (Kubernetes 1.34)
+GitOps: ArgoCD for declarative sync from Git
+External Access: AWS ALB Ingress (via AWS Load Balancer Controller)
+IaC: Terraform (VPC + EKS + IRSA)
+Security: OIDC, IRSA, non-root containers, least-privilege IAM
 
 ## Current Stack
 
 - AWS EKS
 - Terraform (VPC + EKS + ECR)
 - GitHub Actions CI per service
-- Kubernetes manifests (soon → GitOps)
+- Kubernetes manifests 
+- GitOps (ArgoCD)
 
 ## Services
 
 | Service  | Language   | New folder name    | Status      |
 |----------|------------|--------------------|-------------|
-| Auth     | Node.js    | `services/auth`    | maybe archive |
+| Auth     | Node.js    | `services/auth`    | archived |
 | Product  | Python     | `services/product` | keep        |
 | Order    | Go         | `services/order`   | keep        |
 
@@ -327,5 +171,115 @@ graph TD
     style D fill:#527fff,stroke:#333,color:#fff
 ```
 
+Current flow: GitHub → CI → ECR → ArgoCD → EKS → ALB → external traffic
 
-Work in progress — follow the journey!
+## Project Structure
+
+devops-production-microservices/
+├── services/
+│   ├── order/                # Go microservice
+│   │   ├── Dockerfile
+│   │   ├── main.go
+│   │   └── go.mod
+│   └── product/              # FastAPI microservice
+│       ├── Dockerfile
+│       ├── main.py
+│       └── requirements.txt
+├── k8s/
+│   └── base/                 # Kustomize base
+│       ├── kustomization.yaml
+│       ├── deployments/
+│       ├── services/
+│       ├── ingress/
+│       └── config/
+├── argocd/
+│   └── applications/
+│       └── microservices.yaml  # ArgoCD Application
+├── terraform/
+│   ├── main.tf
+│   ├── vpc/
+│   ├── eks/
+│   └── outputs.tf
+└── .github/workflows/
+    └── ci-build-push.yaml    # Unified CI with matrix + OIDC
+
+## Key Technologies & Decisions
+
+| Category        | Technology                         | Why this choice?                                                                 |
+|-----------------|------------------------------------|----------------------------------------------------------------------------------|
+| CI/CD           | GitHub Actions + OIDC              | Secure (no secrets), native to repo, matrix builds for parallel service pipelines |
+| Image Registry  | AWS ECR (private)                  | Integrated with EKS, free tier, image scanning on push                            |
+| Cluster         | Amazon EKS 1.34                    | Managed Kubernetes, IRSA support, managed addons (CNI, CoreDNS, EBS CSI)          |
+| GitOps          | ArgoCD                             | Declarative sync, auto-prune/self-heal, UI for visibility                         |
+| Ingress         | AWS Load Balancer Controller       | Provisions ALB, path-based routing, integrates with Route 53 (future)             |
+| IaC             | Terraform + modules                | Reproducible infra, state locking (S3/DynamoDB), reusable outputs                 |
+| Security        | OIDC, IRSA, non-root pods          | No long-lived keys, least privilege, reduced attack surface                       |
+
+
+## Setup & Run (One-Time)
+
+1. Prerequisites
+AWS account with IAM permissions (EKS, ECR, VPC, IAM)
+aws, kubectl, eksctl, helm, terraform, git
+
+2. Bootstrap infrastructureBashcd terraform
+terraform init
+terraform apply   # ~20 min – creates VPC + EKS cluster
+aws eks update-kubeconfig --region us-east-1 --name devops-prod-eks
+
+3. Install ArgoCD
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=300s
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+
+4. Deploy via ArgoCD
+The Application microservices is already in Git → ArgoCD auto-syncs on push.
+Manual sync: ArgoCD UI → Applications → microservices → Sync
+
+5. Access externally
+After AWS Load Balancer Controller is installed and Ingress syncs:textkubectl get ingress microservices-ingress -n microservices
+curl http://<alb-hostname>/products
+curl http://<alb-hostname>/orders
+
+## Screenshots
+
+1. GitHub Actions CI run – matrix builds for order & product + ECR push
+(CI Success)
+2. ECR with short SHA + latest tags
+(ECR Images)
+3. ArgoCD UI – Synced Application 
+(ArgoCD Synced)
+4. kubectl get pods – Running services 
+(Pods Running)
+5. ALB Ingress hostname 
+(ALB Hostname)
+6. curl response from /products 
+(External Access)
+
+
+## Cleanup (Important!)
+
+Bashcd terraform
+terraform destroy   # destroys EKS + VPC (takes ~20 min)
+
+Never leave EKS running — costs ~$70–150/month.
+
+
+## 📄 License
+
+This project is for educational and portfolio purposes.
+*Built as a portfolio project demonstrating production-grade DevOps practices.*
+---
+
+## 👤 Author
+
+**Anthony Elorm Zottor**
+- LinkedIn: [(https://www.linkedin.com/in/aezottor/)]
+- GitHub: [(https://github.com/elorm116)]
+- Email: [aezottor.@gmail.com]
+
+Happy deploying! 🚀
+---
+
