@@ -13,10 +13,29 @@ spec:
         app: product-service
     spec:
       containers:
-        - name: product
+        - name: product-service
           image: 867344472959.dkr.ecr.us-east-1.amazonaws.com/product-service:latest
           ports:
             - containerPort: 8000
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
           resources:
             requests:
               memory: "256Mi"
