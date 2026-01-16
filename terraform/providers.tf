@@ -8,7 +8,11 @@ terraform {
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = ">= 2.25.0"
+      version = ">= 3.0.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">= 3.0.0"
     }
   }
 }
@@ -17,7 +21,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-
+# The exec block is used to configure the Kubernetes provider to authenticate with the EKS cluster using AWS IAM.
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
@@ -26,5 +30,18 @@ provider "kubernetes" {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
     args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+  }
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+    
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+    }
   }
 }
