@@ -78,11 +78,6 @@ graph TD
     style I fill:#00A1D6,stroke:#333
     style K fill:#E652A0,stroke:#333
     style L fill:#4CAF50,stroke:#333,color:#fff
-
-
-
-  
-
 Data Flow
 
 Developer pushes code → GitHub Actions builds & pushes images to ECR
@@ -91,33 +86,72 @@ EKS pulls images → deploys pods
 ALB routes traffic → external access via api.learndevops.site
 Prometheus scrapes metrics → Grafana visualizes cluster + pod health
 
-## Data Flow
 
-1. Developer pushes code → GitHub Actions builds & pushes images to ECR
-2. ArgoCD detects Git change → syncs manifests to EKS
-3. EKS pulls images → deploys pods
-4. ALB routes traffic → external access via `api.learndevops.site`
-5. Prometheus scrapes metrics → Grafana visualizes cluster + pod health
+🛠️ Tech Stack
 
-## Tech Stack
 
-| Category              | Technology                              | Purpose / Why Chosen                              |
-|-----------------------|-----------------------------------------|---------------------------------------------------|
-| Cloud                 | AWS (EKS, ECR, VPC, IAM, ALB)           | Enterprise standard, managed Kubernetes, deep integration |
-| IaC                   | Terraform + Modules                     | Reproducible, state locking (S3/DynamoDB), modular |
-| Container Registry    | Amazon ECR                              | Integrated with EKS, scan on push, free tier      |
-| Orchestration         | Amazon EKS 1.34                         | Managed control plane, IRSA, addons (CNI, CoreDNS, EBS CSI) |
-| CI/CD                 | GitHub Actions + OIDC                   | Secure (no secrets), matrix builds, path filtering |
-| GitOps                | ArgoCD                                  | Declarative sync, auto-prune, self-heal, UI visibility |
-| Ingress               | AWS Load Balancer Controller            | Provisions ALB, path-based routing                |
-| Monitoring            | Prometheus + Grafana (via blueprints)   | Cluster + pod metrics, dashboards, alerts         |
-| DNS & SSL             | Cloudflare (free proxy + universal SSL) | Fast DNS, free HTTPS, DDoS protection, no extra cost |
-| Languages             | Go (order) + Python/FastAPI (product)   | Polyglot microservices demo                       |
 
-## Project Structure
 
-```text
-devops-production-microservices/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CategoryTechnologyPurpose / Why ChosenCloudAWS (EKS, ECR, VPC, IAM, ALB)Enterprise standard, managed Kubernetes, deep integrationIaCTerraform + ModulesReproducible, state locking (S3/DynamoDB), modularContainer RegistryAmazon ECRIntegrated with EKS, scan on push, free tierOrchestrationAmazon EKS 1.34Managed control plane, IRSA, addons (CNI, CoreDNS, EBS CSI)CI/CDGitHub Actions + OIDCSecure (no secrets), matrix builds, path filteringGitOpsArgoCDDeclarative sync, auto-prune, self-heal, UI visibilityIngressAWS Load Balancer ControllerProvisions ALB, path-based routing, integrates with Route 53MonitoringPrometheus + Grafana (via blueprints)Cluster + pod metrics, dashboards, alertsDNS & SSLCloudflare (free proxy + universal SSL)Fast DNS, free HTTPS, DDoS protection, no extra costLanguagesGo (order) + Python/FastAPI (product)Polyglot microservices demo
+
+📁 Project Structure
+textdevops-production-microservices/
 ├── services/                    # Microservice source code
 │   ├── order/                   # Go service
 │   └── product/                 # Python/FastAPI service
@@ -134,36 +168,53 @@ devops-production-microservices/
 ├── .github/workflows/           # CI/CD pipelines
 └── README.md
 
+🔧 Microservices
 
 
 
-## Services Overview
-
-| Service  | Language       | Port | Path      | Description              |
-|----------|----------------|------|-----------|--------------------------|
-| Order    | Go             | 8080 | /orders   | Order processing API     |
-| Product  | Python/FastAPI | 3000 | /products | Product catalog API      |
-
-**Both services include:**
-
-- Health endpoints (`/health`)
-- Graceful shutdown
-- Structured logging
-- Resource limits & requests
-- Non-root containers
 
 
-## CI/CD Pipeline
-
-- **Workflow file**: `.github/workflows/ci-build-push.yaml`
-- **Triggers**: push / pull request to `main`
-- **Authentication**: OIDC → secure AWS access (no secrets stored in GitHub)
-- **Strategy**: matrix build → builds both services in parallel
-- **Image tagging**: short commit SHA + `:latest`
-- **Registry**: Amazon ECR
 
 
-graph LR
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ServiceLanguagePortPathDescriptionOrderGo8080/ordersOrder processing APIProductPython/FastAPI3000/productsProduct catalog API
+Both services include:
+
+Health endpoints (/health)
+Graceful shutdown
+Structured logging
+Resource limits & requests
+Non-root containers
+
+
+🔄 CI/CD Pipeline
+GitHub Actions Workflow (.github/workflows/ci-build-push.yaml)
+
+Triggers on push/PR to main
+Uses OIDC for secure AWS access (no secrets in GitHub)
+Matrix strategy: builds both services in parallel
+Tags images with short SHA + :latest
+Pushes to Amazon ECR
+
+mermaidgraph LR
     A[Push/PR to main] --> B[GitHub Actions]
     B --> C[Build Order (Go)]
     B --> D[Build Product (FastAPI)]
@@ -172,69 +223,90 @@ graph LR
     E --> G[ArgoCD detects change → syncs to EKS]
     F --> G
 
+☸️ Infrastructure (Terraform + EKS)
+terraform/main.tf (simplified)
 
-## Infrastructure (Terraform + EKS)
+VPC with public/private subnets, NAT gateway
+EKS cluster (1.34) with IRSA, public/private endpoint
+Managed node groups (t3.medium, 60 GiB gp3 volumes)
+IAM policies for nodes (CNI, ECR, SSM, EBS CSI)
+Blueprints addons module for ALB Controller + Prometheus/Grafana
 
-- VPC: public + private subnets, NAT gateway
-- EKS cluster: version 1.34
-  - Public + private endpoint
-  - IRSA enabled
-- Node groups: `t3.medium`, 60 GiB gp3 volumes
-- IAM policies for nodes: CNI, ECR pull, SSM, EBS CSI
-- Add-ons (via blueprints): 
-  - AWS Load Balancer Controller
-  - Prometheus + Grafana
+Cost awareness: ~$70–150/month when running — always destroy after demos.
 
-## GitOps with ArgoCD
+🎯 GitOps with ArgoCD
 
-- Watches: `k8s/base` folder in Git
-- Auto-sync enabled
-- Settings: `createNamespace=true`, `prune: true`, `selfHeal: true`
-- Main Application manifest: `argocd/applications/microservices.yaml`
+ArgoCD watches k8s/base in Git
+Auto-syncs Deployments, Services, Ingress
+CreateNamespace=true + prune: true + selfHeal: true
+Application manifest: argocd/applications/microservices.yaml
 
-## External Access (ALB + Cloudflare)
+YAMLspec:
+  source:
+    repoURL: https://github.com/elorm116/devops-production-microservices.git
+    targetRevision: main
+    path: k8s/base
+  destination:
+    namespace: microservices
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
 
-- AWS Load Balancer Controller → provisions ALB from Ingress resource
-- Cloudflare:
-  - DNS: `api.learndevops.site`
-  - Free proxy + SSL termination
-- Routing:
-  - `/products` → product-service
-  - `/orders`   → order-service
+🌐 External Access (ALB + Cloudflare)
 
-## Monitoring (Prometheus + Grafana)
+AWS Load Balancer Controller provisions ALB from Ingress
+Cloudflare DNS + free proxy/SSL for api.learndevops.site
+Paths: /products → product-service, /orders → order-service
 
-- Installed via `eks-blueprints-addons`
-- Prometheus scrapes: cluster + pod metrics
-- Grafana:
-  - Default dashboards
-  - Imported: Kubernetes Cluster, Node Exporter, Pod Metrics
-  - Persistent storage enabled
+YAML# k8s/base/ingress/ingress.yaml
+spec:
+  ingressClassName: alb
+  rules:
+    - host: api.learndevops.site
+      http:
+        paths:
+          - path: /products
+            backend:
+              service:
+                name: product-service
+                port: 80
+          - path: /orders
+            backend:
+              service:
+                name: order-service
+                port: 80
 
-**Temporary access:**
+📊 Monitoring (Prometheus + Grafana)
 
-```bash
-kubectl port-forward -n monitoring svc/kube-prometheus-stack-grafana 3000:80
+Enabled via eks-blueprints-addons
+Prometheus scrapes cluster + pod metrics
+Grafana with default + imported dashboards (Kubernetes Cluster, Node Exporter, Pod Metrics)
+Persistent storage for data retention
 
-→ open http://localhost:3000
-(credentials: admin / your-password)
+Access (temporary):
+Bashkubectl port-forward -n monitoring svc/kube-prometheus-stack-grafana 3000:80
+→ http://localhost:3000 (admin / your-password)
 
-## Security & Best Practices
+🔒 Security & Best Practices
 
-OIDC for GitHub Actions (no long-lived keys)
-IRSA for pod-level permissions
+OIDC for GitHub Actions → no long-lived keys
+IRSA for pod permissions
 Non-root containers
-Resource requests & limits
+Resource requests/limits
 Private subnets + NAT
-ECR image scanning
+Image scanning in ECR
 Cloudflare proxy + free SSL
 
-## Cost Management
-EKS setup typically costs ~$70–150/month — destroy when not in use!
+
+💰 Cost Management
+EKS can cost ~$70–150/month — always destroy when done!
 Bashcd terraform
 terraform destroy -auto-approve
 
-## Skills Demonstrated
+🎓 Skills Demonstrated
 
 Infrastructure as Code (Terraform + modules)
 Secure CI/CD (GitHub Actions + OIDC)
@@ -246,70 +318,23 @@ DNS + SSL (Cloudflare proxy)
 Troubleshooting (CrashLoopBackOff, OOMKilled, IAM issues)
 
 
-## Getting Started
-**Prerequisites**
+📸 Screenshots
 
-AWS account
-Installed CLIs: aws, kubectl, terraform, helm, git
 
-1. Clone & Configure
-Bashgit clone https://github.com/elorm116/devops-production-microservices.git
-cd devops-production-microservices
-aws configure
-2. Deploy Infrastructure
-Bashcd terraform
-terraform init
-terraform apply
+🧹 Cleanup
+Bash# Delete ArgoCD apps first
+kubectl delete -n argocd -f argocd/applications/
 
-# Update kubeconfig
-aws eks update-kubeconfig --region us-east-1 --name devops-prod-eks
-3. Install ArgoCD
-Bashkubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-
-# Access UI
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-→ open https://localhost:8080
-(login: admin / auto-generated password)
-4. Deploy Applications
-ArgoCD auto-syncs from Git.
-Manual sync possible via UI if needed.
-5. Access Services
-Bashkubectl get ingress microservices-ingress -n microservices
-
-curl https://api.learndevops.site/products
-
-## Cleanup
-Bashcd terraform
+# Destroy infrastructure
+cd terraform
 terraform destroy -auto-approve
 
-## Future Improvements
-HTTPS with cert-manager + Let's Encrypt
-Auto-scaling with Karpenter
-CI/CD promotion pipeline (dev → staging → prod)
-Chaos engineering tests
-
-
-
-
-
-
-## 👤 Author
-
-**Anthony Elorm Zottor**
-
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin)](https://www.linkedin.com/in/aezottor/)
-[![GitHub](https://img.shields.io/badge/GitHub-Follow-black?logo=github)](https://github.com/elorm116)
-[![Email](https://img.shields.io/badge/Email-Contact-red?logo=gmail)](mailto:aezottor@gmail.com)
-
----
-
-<div align="center">
-
-**⭐ If you found this project helpful, please give it a star!**
-
-*Built with ☕ and determination as a portfolio project demonstrating production-grade DevOps practices.*
+👤 Author
+Anthony Elorm Zottor
+Portfolio project demonstrating modern DevOps practices.
+GitHub
+LinkedIn
+Built with determination and coffee ☕
+⭐ If this helped you, please star the repo!
 
 🚀 Happy Deploying!
-
-</div>
