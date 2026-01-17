@@ -10,6 +10,7 @@
 > End-to-end microservices platform with secure CI/CD, GitOps, EKS on AWS, ALB Ingress, monitoring (Prometheus + Grafana), and custom domain via Cloudflare.
 
 **Live Demo:**  
+(Down now because I am saving cost on AWS)
 🔗 https://api.learndevops.site/products  
 🔗 https://api.learndevops.site/orders
 
@@ -40,7 +41,7 @@
 
 ## 🎯 Overview
 
-This project is a **real-world, production-grade microservices platform** built to demonstrate modern DevOps practices employers look for in 2026.
+This project is a **real-world, production-grade microservices platform** built to demonstrate modern DevOps practices.
 
 It includes:
 - Secure CI/CD with GitHub Actions + OIDC (no long-lived secrets)
@@ -48,7 +49,7 @@ It includes:
 - GitOps deployment with ArgoCD
 - External access via AWS ALB Ingress + Cloudflare DNS & free SSL
 - Monitoring with Prometheus + Grafana
-- Custom domain (`api.learndevops.site`) for live demo
+- Custom domain (`api.learndevops.site`)
 
 ---
 
